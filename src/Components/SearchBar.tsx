@@ -34,7 +34,7 @@ export const SearchBar: React.FunctionComponent = () => {
     //   .then((datas) => {
     //     console.log(datas);
 
-    router.push(`characters/${characterRef.current.value}`);
+    router.replace(`${characterRef.current.value}`);
     //   });
   };
 
