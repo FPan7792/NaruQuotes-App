@@ -24,17 +24,10 @@ export const SearchBar: React.FunctionComponent = () => {
     cursor: pointer;
   `;
   const handleRefValue = () => {
-    // const searchedValue = characterRef.current.value;
-
     console.log(characterRef.current.value);
-    // fetch(
-    //   `https://animechan.vercel.app/api/quotes/character?name=${characterRef.current.value}`
-    // )
-    //   .then((response) => response.json())
-    //   .then((datas) => {
-    //     console.log(datas);
 
-    router.replace(`${characterRef.current.value}`);
+    characterRef.current.value &&
+      router.replace(`${characterRef.current.value.split(" ").join("")}`);
     //   });
   };
 

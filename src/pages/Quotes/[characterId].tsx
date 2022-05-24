@@ -1,10 +1,11 @@
+import { useState } from "react";
 import styled from "styled-components";
 import { QuoteObject } from "../api/hello";
 import SearchBar from "../../Components/SearchBar";
 
 interface Datas {
   isDatas: boolean;
-  charactersDatas: QuoteObject[];
+  charactersDatas: { numberOfQuotesFound: number; quotesFound: QuoteObject[] };
   searchedString: string;
   quotesFound: number;
 }
@@ -13,6 +14,10 @@ const CharactersQuotes = (props: Datas) => {
   const { isDatas, charactersDatas, searchedString, quotesFound } = props;
 
   console.log("searched", props);
+
+  console.log("render");
+
+  const [page, setPage] = useState<number>(1);
 
   const Container = styled.div`
     display: flex;
@@ -51,33 +56,61 @@ const CharactersQuotes = (props: Datas) => {
         &apos;s quotes
       </h1>
 
-      {isDatas && quotesFound ? (
-        charactersDatas?.map((item, index) => {
-          if (item.anime.toLowerCase().includes("naruto")) {
-            return (
-              <QuoteContainer key={index}>
-                <h3>{item.character}</h3>
-                <p>{item.anime}</p>
-                <p> {item.quote}</p>
-              </QuoteContainer>
-            );
-          }
-        })
+      {isDatas && charactersDatas.quotesFound ? (
+        // charactersDatas?.map((item, index) => {
+        // if (item.anime.toLowerCase().includes("naruto")) {
+        //   return (
+        //     <QuoteContainer key={index}>
+        //       <h3>{item.character}</h3>
+        //       <p>{item.anime}</p>
+        //       <p> {item.quote}</p>
+        //     </QuoteContainer>
+        //   );
+        // }
+        // }
+
+        <QuoteContainer>
+          <h3>{charactersDatas.quotesFound[page - 1].character}</h3>
+          <p>{charactersDatas.quotesFound[page - 1].anime}</p>
+          <p> {charactersDatas.quotesFound[page - 1].quote}</p>
+        </QuoteContainer>
       ) : (
         <p>No datas for this choice</p>
       )}
 
+      <button
+        onClick={() => {
+          page > 1 && setPage((page) => page - 1);
+        }}
+      >
+        Page précédente
+      </button>
+      <p>
+        Page {page} sur {charactersDatas.numberOfQuotesFound}{" "}
+      </p>
+      <button
+        onClick={() => {
+          page < charactersDatas.numberOfQuotesFound &&
+            setPage((page) => page + 1);
+        }}
+      >
+        Page suivante
+      </button>
       {/* {props.charactersDatas[0].anime} */}
     </Container>
   );
 };
 
 export const getServerSideProps = async (context: any) => {
-  // console.log(context);
+  // console.log("CONTEXTE", context);
+  const { req, res, params } = context;
 
-  const character = context.params.characterId;
+  // res.setHeader(
+  //   "Cache-Control",
+  //   "public, s-maxage=10, stale-while-revalidate=59"
+  // );
 
-  console.log("charac", character);
+  const character = params.characterId;
 
   return fetch(
     `https://animechan.vercel.app/api/quotes/character?name=${character}`
@@ -97,19 +130,26 @@ export const getServerSideProps = async (context: any) => {
           },
         };
       } else {
-        let quotesFound = 0;
+        let selectedQuotes: {
+          numberOfQuotesFound: number;
+          quotesFound: QuoteObject[];
+        } = {
+          numberOfQuotesFound: 0,
+          quotesFound: [],
+        };
+
         datas.forEach((quote: QuoteObject) => {
           if (quote.anime.toLowerCase().includes("naruto")) {
-            quotesFound += 1;
+            selectedQuotes.numberOfQuotesFound += 1;
+            selectedQuotes.quotesFound.push(quote);
           }
         });
 
         return {
           props: {
             isDatas: true,
-            charactersDatas: datas,
+            charactersDatas: selectedQuotes,
             searchedString: character,
-            quotesFound,
           },
         };
       }
