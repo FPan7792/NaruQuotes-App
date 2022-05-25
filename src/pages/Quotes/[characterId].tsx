@@ -2,22 +2,51 @@ import { useState } from "react";
 import styled from "styled-components";
 import { QuoteObject } from "../api/hello";
 import SearchBar from "../../Components/SearchBar";
+import Image from "next/image";
+import * as fs from "fs/promises";
 
 interface Datas {
   isDatas: boolean;
   charactersDatas: { numberOfQuotesFound: number; quotesFound: QuoteObject[] };
   searchedString: string;
-  quotesFound: number;
+  parseDirs: PicturesObject[];
+}
+
+function getRandomImage(
+  listOfFolders: PicturesObject[],
+  searchedTerm: string
+): string {
+  let pathToImageOfSearchedTerm: string = "";
+  for (const Folder of listOfFolders) {
+    let randomIndex = Math.round(
+      Math.random() * Folder.numberOfPicturesAvailable - 1
+    );
+
+    if (
+      Folder.name === searchedTerm ||
+      Folder.name.includes(searchedTerm.toLowerCase())
+    ) {
+      pathToImageOfSearchedTerm = `/ressources/images/${Folder.name}/${
+        Folder.name
+      }${randomIndex < 0 ? "0" : randomIndex}.png`;
+      break;
+    } else {
+      pathToImageOfSearchedTerm = `/ressources/images/generics/${
+        randomIndex < 0 ? "0" : randomIndex
+      }.png`;
+    }
+  }
+
+  return pathToImageOfSearchedTerm;
 }
 
 const CharactersQuotes = (props: Datas) => {
-  const { isDatas, charactersDatas, searchedString, quotesFound } = props;
-
-  console.log("searched", props);
-
-  console.log("render");
-
+  const { isDatas, charactersDatas, searchedString, parseDirs } = props;
   const [page, setPage] = useState<number>(1);
+
+  console.log("PD", parseDirs);
+
+  const pictureOfQuote = getRandomImage(parseDirs, searchedString);
 
   const Container = styled.div`
     display: flex;
@@ -28,23 +57,14 @@ const CharactersQuotes = (props: Datas) => {
     border: black 2px solid;
   `;
 
-  const QuoteContainer = styled.div`
+  const PictureBox = styled.div`
     border: black 2px solid;
-    border-radius: 20px;
-    width: 100%;
-  `;
-
-  const Loading = styled.p`
-    color: blue;
-  `;
-  const Error = styled.p`
-    color: red;
-  `;
-
-  const Picture = styled.img`
-    border: 2px solid black;
-    border-radius: 20px;
-    padding: 200px;
+    border-radius: 10px;
+    object-position: center;
+    object-fit: cover;
+    overflow: hidden;
+    width: 400px;
+    height: 400px;
   `;
 
   return (
@@ -57,27 +77,29 @@ const CharactersQuotes = (props: Datas) => {
       </h1>
 
       {isDatas && charactersDatas.quotesFound ? (
-        // charactersDatas?.map((item, index) => {
-        // if (item.anime.toLowerCase().includes("naruto")) {
-        //   return (
-        //     <QuoteContainer key={index}>
-        //       <h3>{item.character}</h3>
-        //       <p>{item.anime}</p>
-        //       <p> {item.quote}</p>
-        //     </QuoteContainer>
-        //   );
-        // }
-        // }
-
-        <QuoteContainer>
-          <h3>{charactersDatas.quotesFound[page - 1].character}</h3>
-          <p>{charactersDatas.quotesFound[page - 1].anime}</p>
-          <p> {charactersDatas.quotesFound[page - 1].quote}</p>
-        </QuoteContainer>
+        <div>
+          <h3>{charactersDatas?.quotesFound[page - 1]?.character}</h3>
+          <p>{charactersDatas?.quotesFound[page - 1]?.anime}</p>
+          <p> {charactersDatas?.quotesFound[page - 1]?.quote}</p>
+        </div>
       ) : (
         <p>No datas for this choice</p>
       )}
 
+      <PictureBox>
+        <Image
+          src={pictureOfQuote}
+          alt={searchedString}
+          width={400}
+          height={400}
+          objectFit="cover"
+          objectPosition="center"
+          // layout="responsive"
+        />
+      </PictureBox>
+
+      {/* AFFICHER SEUELEMENT SI UN PERSONNAGE EST TROUVE */}
+      {/* !!!!!!!!!! */}
       <button
         onClick={() => {
           page > 1 && setPage((page) => page - 1);
@@ -96,21 +118,44 @@ const CharactersQuotes = (props: Datas) => {
       >
         Page suivante
       </button>
-      {/* {props.charactersDatas[0].anime} */}
     </Container>
   );
 };
 
+type PicturesObject = { name: string; numberOfPicturesAvailable: number };
+
 export const getServerSideProps = async (context: any) => {
-  // console.log("CONTEXTE", context);
-  const { req, res, params } = context;
-
-  // res.setHeader(
-  //   "Cache-Control",
-  //   "public, s-maxage=10, stale-while-revalidate=59"
-  // );
-
+  const { params } = context;
   const character = params.characterId;
+  const parseDirs: PicturesObject[] = [];
+
+  async function findSalesFind(folderName: string): Promise<any> {
+    const storesFiles = await fs.readdir(folderName, { withFileTypes: true });
+
+    for await (const File of storesFiles) {
+      const pictureFolderInfos = {
+        name: File.name,
+        numberOfPicturesAvailable: 0,
+      };
+      // console.log("FILE", File);
+      if (!File.isDirectory()) {
+        let index = parseDirs.length - 1;
+
+        if (parseDirs?.length === 0) {
+          await parseDirs.push(pictureFolderInfos);
+          parseDirs[0].numberOfPicturesAvailable += 1;
+        } else parseDirs[index].numberOfPicturesAvailable += 1;
+      } else {
+        await parseDirs.push(pictureFolderInfos);
+        await findSalesFind(`${folderName}/${File.name}`);
+      }
+    }
+
+    return parseDirs;
+  }
+
+  await findSalesFind("public/ressources/images");
+  console.log("PD", parseDirs);
 
   return fetch(
     `https://animechan.vercel.app/api/quotes/character?name=${character}`
@@ -119,8 +164,6 @@ export const getServerSideProps = async (context: any) => {
       return response.json();
     })
     .then((datas) => {
-      console.log("DATAS", datas);
-
       if (datas.error) {
         return {
           props: {
@@ -150,6 +193,7 @@ export const getServerSideProps = async (context: any) => {
             isDatas: true,
             charactersDatas: selectedQuotes,
             searchedString: character,
+            parseDirs,
           },
         };
       }
