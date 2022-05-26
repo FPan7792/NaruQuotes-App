@@ -22,7 +22,7 @@ const Home: NextPage = () => {
       Je suis une lanfing page
       <br />
       <Link href="Quotes/quotes">
-        <LinkToQuotePage>Go To Quote Page</LinkToQuotePage>
+        <LinkToQuotePage>Generate a random quote now</LinkToQuotePage>
       </Link>
     </MainDiv>
   );

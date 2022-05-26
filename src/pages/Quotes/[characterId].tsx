@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { QuoteObject } from "../api/hello";
 import SearchBar from "../../Components/SearchBar";
 import Image from "next/image";
+import Link from "next/link";
 import * as fs from "fs/promises";
 
 interface Datas {
@@ -14,28 +15,39 @@ interface Datas {
 
 function getRandomImage(
   listOfFolders: PicturesObject[],
-  searchedTerm: string
+  searchedTerm: string,
+  previousValue: string
 ): string {
   let pathToImageOfSearchedTerm: string = "";
-  for (const Folder of listOfFolders) {
-    let randomIndex = Math.round(
-      Math.random() * Folder.numberOfPicturesAvailable - 1
-    );
+  do {
+    for (const Folder of listOfFolders) {
+      let randomIndex: number;
+      // Math.round(
+      //   Math.random() * Folder.numberOfPicturesAvailable - 1
+      // );
 
-    if (
-      Folder.name === searchedTerm ||
-      Folder.name.includes(searchedTerm.toLowerCase())
-    ) {
-      pathToImageOfSearchedTerm = `/ressources/images/${Folder.name}/${
-        Folder.name
-      }${randomIndex < 0 ? "0" : randomIndex}.png`;
-      break;
-    } else {
-      pathToImageOfSearchedTerm = `/ressources/images/generics/${
-        randomIndex < 0 ? "0" : randomIndex
-      }.png`;
+      randomIndex = Math.round(
+        Math.random() * Folder.numberOfPicturesAvailable - 1
+      );
+
+      if (
+        Folder.name === searchedTerm ||
+        Folder.name.includes(searchedTerm.toLowerCase())
+      ) {
+        pathToImageOfSearchedTerm = `/ressources/images/${Folder.name}/${
+          Folder.name
+        }${randomIndex < 0 ? "0" : randomIndex}.png`;
+        break;
+      } else {
+        pathToImageOfSearchedTerm = `/ressources/images/generics/${
+          randomIndex < 0 ? "0" : randomIndex
+        }.png`;
+      }
     }
-  }
+  } while (pathToImageOfSearchedTerm === previousValue);
+
+  console.log("PV", previousValue);
+  console.log("Path", pathToImageOfSearchedTerm);
 
   return pathToImageOfSearchedTerm;
 }
@@ -43,10 +55,31 @@ function getRandomImage(
 const CharactersQuotes = (props: Datas) => {
   const { isDatas, charactersDatas, searchedString, parseDirs } = props;
   const [page, setPage] = useState<number>(1);
+  const [previousImagePath, setPreviousImagePath] = useState<string>("");
 
-  console.log("PD", parseDirs);
+  // console.log("PD", parseDirs);
 
-  const pictureOfQuote = getRandomImage(parseDirs, searchedString);
+  console.log(props);
+
+  const pictureOfQuote = getRandomImage(
+    parseDirs,
+    searchedString,
+    previousImagePath
+  );
+
+  // const previousImage = useMemo(() => {
+  //   // console.log("render");
+  //   // console.log(pictureOfQuote);
+  //   // console.log(previousImagePath);
+
+  //   let previousValue = pictureOfQuote;
+
+  //   return setPreviousImagePath(previousValue);
+  // }, [page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchedString]);
 
   const Container = styled.div`
     display: flex;
@@ -67,8 +100,16 @@ const CharactersQuotes = (props: Datas) => {
     height: 400px;
   `;
 
+  // console.log(isDatas);
+  // console.log(charactersDatas.quotesFound);
+
   return (
     <Container>
+      <nav>
+        <Link href="/">
+          <a>Home</a>
+        </Link>
+      </nav>
       <SearchBar />
       <h1>
         {searchedString[0].toUpperCase() +
@@ -86,38 +127,45 @@ const CharactersQuotes = (props: Datas) => {
         <p>No datas for this choice</p>
       )}
 
-      <PictureBox>
-        <Image
-          src={pictureOfQuote}
-          alt={searchedString}
-          width={400}
-          height={400}
-          objectFit="cover"
-          objectPosition="center"
-          // layout="responsive"
-        />
-      </PictureBox>
+      {/* Sinon mettre une image générique */}
+      {isDatas && (
+        <PictureBox>
+          <Image
+            src={pictureOfQuote}
+            alt={searchedString}
+            width={400}
+            height={400}
+            objectFit="cover"
+            objectPosition="center"
+            // layout="responsive"
+          />
+        </PictureBox>
+      )}
 
       {/* AFFICHER SEUELEMENT SI UN PERSONNAGE EST TROUVE */}
       {/* !!!!!!!!!! */}
-      <button
-        onClick={() => {
-          page > 1 && setPage((page) => page - 1);
-        }}
-      >
-        Page précédente
-      </button>
-      <p>
-        Page {page} sur {charactersDatas.numberOfQuotesFound}{" "}
-      </p>
-      <button
-        onClick={() => {
-          page < charactersDatas.numberOfQuotesFound &&
-            setPage((page) => page + 1);
-        }}
-      >
-        Page suivante
-      </button>
+      {charactersDatas.numberOfQuotesFound > 1 && (
+        <div>
+          <button
+            onClick={() => {
+              page > 1 && setPage((page) => page - 1);
+            }}
+          >
+            Page précédente
+          </button>
+          <p>
+            Page {page} sur {charactersDatas.numberOfQuotesFound}{" "}
+          </p>
+          <button
+            onClick={() => {
+              page < charactersDatas.numberOfQuotesFound &&
+                setPage((page) => page + 1);
+            }}
+          >
+            Page suivante
+          </button>
+        </div>
+      )}
     </Container>
   );
 };
@@ -170,6 +218,7 @@ export const getServerSideProps = async (context: any) => {
             isDatas: false,
             charactersDatas: [],
             searchedString: character,
+            parseDirs,
           },
         };
       } else {
@@ -190,7 +239,7 @@ export const getServerSideProps = async (context: any) => {
 
         return {
           props: {
-            isDatas: true,
+            isDatas: selectedQuotes.numberOfQuotesFound < 1 ? false : true,
             charactersDatas: selectedQuotes,
             searchedString: character,
             parseDirs,

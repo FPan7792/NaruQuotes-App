@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import Link from "next/link";
 import styled from "styled-components";
 import { useGetRandomQuote } from "../api/hello";
 import SearchBar from "../../Components/SearchBar";
@@ -53,6 +54,11 @@ export const Quote: NextPage = () => {
     console.log("INDEX", index);
     return (
       <Container>
+        <nav>
+          <Link href="/">
+            <a>Home</a>
+          </Link>
+        </nav>
         <SearchBar />
         <p>{list[index].character}</p>
         <p>{list[index].quote}</p>
