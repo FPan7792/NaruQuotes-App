@@ -1,10 +1,93 @@
-import { useState, useMemo, useEffect } from "react";
+import Head from "next/head";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { QuoteObject } from "../api/hello";
-import SearchBar from "../../Components/SearchBar";
+import { QuoteObject, PicturesObject } from "../../types";
 import Image from "next/image";
-import Link from "next/link";
 import * as fs from "fs/promises";
+import Layout from "../../Components/Layout";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleRight, faCircleLeft } from "@fortawesome/free-solid-svg-icons";
+
+export const MainContainer = styled.div`
+  /* border: pink 2px solid; */
+  display: flex;
+  justify-content: space-between;
+  margin: 80px 200px;
+  padding: 0px 0 0px 180px;
+  border-left: orangered 1px solid;
+`;
+
+const SectionQuote = styled.div`
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  max-height: 400px;
+  bottom: 0;
+`;
+
+export const SectionQuoteTitle = styled.h3`
+  font-size: 45px;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+
+  span {
+    display: inline-block;
+    font-weight: normal;
+    font-size: 20px;
+  }
+`;
+
+const SectionQuoteContent = styled.p`
+  font-family: "Oregano", cursive;
+  font-size: 24px;
+  /* border: black 2px solid; */
+  max-height: 40%;
+  overflow-y: auto;
+`;
+
+const SectionQuoteAnime = styled.span`
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  color: orangered;
+  font-size: 15px;
+  margin-top: -50px;
+  margin-bottom: 40px;
+`;
+
+// SECTION IMAGE
+const PictureBox = styled.div`
+  border-radius: 50px;
+  object-position: center;
+  object-fit: cover;
+  overflow: hidden;
+  height: 400px;
+`;
+
+// SECTION PAGE
+const PageManager = styled.nav`
+  display: flex;
+  justify-content: space-between;
+  margin: 40px 200px;
+  padding: 0 200px;
+  font-family: "Rubik", sans-serif;
+`;
+
+const PageButton = styled.button`
+  background-color: orange;
+  padding: 10px 10px;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  cursor: pointer;
+  height: 40px;
+  color: whitesmoke;
+
+  :active {
+    background-color: orangered;
+  }
+`;
 
 interface Datas {
   isDatas: boolean;
@@ -22,10 +105,6 @@ function getRandomImage(
   do {
     for (const Folder of listOfFolders) {
       let randomIndex: number;
-      // Math.round(
-      //   Math.random() * Folder.numberOfPicturesAvailable - 1
-      // );
-
       randomIndex = Math.round(
         Math.random() * Folder.numberOfPicturesAvailable - 1
       );
@@ -57,120 +136,90 @@ const CharactersQuotes = (props: Datas) => {
   const [page, setPage] = useState<number>(1);
   const [previousImagePath, setPreviousImagePath] = useState<string>("");
 
-  // console.log("PD", parseDirs);
-
-  console.log(props);
-
   const pictureOfQuote = getRandomImage(
     parseDirs,
     searchedString,
     previousImagePath
   );
 
-  // const previousImage = useMemo(() => {
-  //   // console.log("render");
-  //   // console.log(pictureOfQuote);
-  //   // console.log(previousImagePath);
-
-  //   let previousValue = pictureOfQuote;
-
-  //   return setPreviousImagePath(previousValue);
-  // }, [page]);
-
   useEffect(() => {
     setPage(1);
   }, [searchedString]);
 
-  const Container = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    margin: 20px;
-    border: black 2px solid;
-  `;
-
-  const PictureBox = styled.div`
-    border: black 2px solid;
-    border-radius: 10px;
-    object-position: center;
-    object-fit: cover;
-    overflow: hidden;
-    width: 400px;
-    height: 400px;
-  `;
-
-  // console.log(isDatas);
-  // console.log(charactersDatas.quotesFound);
-
   return (
-    <Container>
-      <nav>
-        <Link href="/">
-          <a>Home</a>
-        </Link>
-      </nav>
-      <SearchBar />
-      <h1>
-        {searchedString[0].toUpperCase() +
-          searchedString.split("").splice(1).join("")}
-        &apos;s quotes
-      </h1>
+    <Layout>
+      <Head>
+        <title>
+          NaruQuotes: Generate random citations now ! -{" "}
+          {charactersDatas?.quotesFound[page - 1]?.character}
+        </title>
+      </Head>
+      <MainContainer>
+        {isDatas && charactersDatas.quotesFound ? (
+          <SectionQuote>
+            <SectionQuoteTitle>
+              <span>
+                {
+                  charactersDatas?.quotesFound[page - 1]?.character.split(
+                    " "
+                  )[1]
+                }
+              </span>{" "}
+              {charactersDatas?.quotesFound[page - 1]?.character.split(" ")[0]}
+            </SectionQuoteTitle>
+            <SectionQuoteAnime>
+              ({charactersDatas?.quotesFound[page - 1]?.anime})
+            </SectionQuoteAnime>
 
-      {isDatas && charactersDatas.quotesFound ? (
-        <div>
-          <h3>{charactersDatas?.quotesFound[page - 1]?.character}</h3>
-          <p>{charactersDatas?.quotesFound[page - 1]?.anime}</p>
-          <p> {charactersDatas?.quotesFound[page - 1]?.quote}</p>
-        </div>
-      ) : (
-        <p>No datas for this choice</p>
-      )}
+            <SectionQuoteContent>
+              &quot;
+              {charactersDatas?.quotesFound[page - 1]?.quote}
+              &quot;
+            </SectionQuoteContent>
+          </SectionQuote>
+        ) : (
+          <p>No datas for this choice</p>
+        )}
 
-      {/* Sinon mettre une image générique */}
-      {isDatas && (
-        <PictureBox>
-          <Image
-            src={pictureOfQuote}
-            alt={searchedString}
-            width={400}
-            height={400}
-            objectFit="cover"
-            objectPosition="center"
-            // layout="responsive"
-          />
-        </PictureBox>
-      )}
+        {isDatas && (
+          <PictureBox>
+            <Image
+              src={pictureOfQuote}
+              alt={searchedString}
+              width={400}
+              height={400}
+              objectFit="cover"
+              objectPosition="center"
+            />
+          </PictureBox>
+        )}
+      </MainContainer>
 
-      {/* AFFICHER SEUELEMENT SI UN PERSONNAGE EST TROUVE */}
-      {/* !!!!!!!!!! */}
       {charactersDatas.numberOfQuotesFound > 1 && (
-        <div>
-          <button
+        <PageManager>
+          <PageButton
             onClick={() => {
               page > 1 && setPage((page) => page - 1);
             }}
           >
-            Page précédente
-          </button>
+            <FontAwesomeIcon size={"lg"} icon={faCircleLeft} />
+          </PageButton>
           <p>
-            Page {page} sur {charactersDatas.numberOfQuotesFound}{" "}
+            {page} sur {charactersDatas.numberOfQuotesFound}{" "}
           </p>
-          <button
+          <PageButton
             onClick={() => {
               page < charactersDatas.numberOfQuotesFound &&
                 setPage((page) => page + 1);
             }}
           >
-            Page suivante
-          </button>
-        </div>
+            <FontAwesomeIcon size={"lg"} icon={faCircleRight} />
+          </PageButton>
+        </PageManager>
       )}
-    </Container>
+    </Layout>
   );
 };
-
-type PicturesObject = { name: string; numberOfPicturesAvailable: number };
 
 export const getServerSideProps = async (context: any) => {
   const { params } = context;
@@ -185,7 +234,6 @@ export const getServerSideProps = async (context: any) => {
         name: File.name,
         numberOfPicturesAvailable: 0,
       };
-      // console.log("FILE", File);
       if (!File.isDirectory()) {
         let index = parseDirs.length - 1;
 
@@ -203,7 +251,6 @@ export const getServerSideProps = async (context: any) => {
   }
 
   await findSalesFind("public/ressources/images");
-  console.log("PD", parseDirs);
 
   return fetch(
     `https://animechan.vercel.app/api/quotes/character?name=${character}`
