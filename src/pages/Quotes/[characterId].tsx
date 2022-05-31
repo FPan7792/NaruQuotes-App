@@ -99,34 +99,34 @@ interface Datas {
 function getRandomImage(
   listOfFolders: PicturesObject[],
   searchedTerm: string,
-  previousValue: string
+  previousValue?: string
 ): string {
   let pathToImageOfSearchedTerm: string = "";
-  do {
-    for (const Folder of listOfFolders) {
-      let randomIndex: number;
-      randomIndex = Math.round(
-        Math.random() * Folder.numberOfPicturesAvailable - 1
-      );
+  // do {
+  for (const Folder of listOfFolders) {
+    let randomIndex: number;
+    randomIndex = Math.round(
+      Math.random() * Folder.numberOfPicturesAvailable - 1
+    );
 
-      if (
-        Folder.name === searchedTerm ||
-        Folder.name.includes(searchedTerm.toLowerCase())
-      ) {
-        pathToImageOfSearchedTerm = `/ressources/images/${Folder.name}/${
-          Folder.name
-        }${randomIndex < 0 ? "0" : randomIndex}.png`;
-        break;
-      } else {
-        pathToImageOfSearchedTerm = `/ressources/images/generics/${
-          randomIndex < 0 ? "0" : randomIndex
-        }.png`;
-      }
+    if (
+      Folder.name === searchedTerm ||
+      Folder.name.includes(searchedTerm.toLowerCase())
+    ) {
+      pathToImageOfSearchedTerm = `/ressources/images/${Folder.name}/${
+        Folder.name
+      }${randomIndex < 0 ? "0" : randomIndex}.png`;
+      break;
+    } else {
+      pathToImageOfSearchedTerm = `/ressources/images/generics/${
+        randomIndex < 0 ? "0" : randomIndex
+      }.png`;
     }
-  } while (pathToImageOfSearchedTerm === previousValue);
+  }
+  // } while (pathToImageOfSearchedTerm === previousValue);
 
-  console.log("PV", previousValue);
-  console.log("Path", pathToImageOfSearchedTerm);
+  // console.log("PV", previousValue);
+  // console.log("Path", pathToImageOfSearchedTerm);
 
   return pathToImageOfSearchedTerm;
 }
