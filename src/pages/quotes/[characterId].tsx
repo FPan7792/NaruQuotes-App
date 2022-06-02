@@ -250,7 +250,7 @@ export const getServerSideProps = async (context: any) => {
     return parseDirs;
   }
 
-  await findSalesFind("public/ressources/images");
+  // await findSalesFind("public/ressources/images");
 
   return fetch(
     `https://animechan.vercel.app/api/quotes/character?name=${character}`
@@ -289,7 +289,15 @@ export const getServerSideProps = async (context: any) => {
             isDatas: selectedQuotes.numberOfQuotesFound < 1 ? false : true,
             charactersDatas: selectedQuotes,
             searchedString: character,
-            parseDirs,
+            parseDirs: [
+              { name: "generics", numberOfPicturesAvailable: 4 },
+              { name: "itachi", numberOfPicturesAvailable: 4 },
+              { name: "kakashi", numberOfPicturesAvailable: 1 },
+              { name: "naruto", numberOfPicturesAvailable: 4 },
+              { name: "obito", numberOfPicturesAvailable: 1 },
+              { name: "pain", numberOfPicturesAvailable: 1 },
+              { name: "sasuke", numberOfPicturesAvailable: 3 },
+            ],
           },
         };
       }
