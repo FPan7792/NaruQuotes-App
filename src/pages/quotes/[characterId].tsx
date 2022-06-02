@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { QuoteObject, PicturesObject } from "../../types";
 import Image from "next/image";
-import * as fs from "fs/promises";
+// import * as fs from "fs/promises";
 import Layout from "../../Components/Layout";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -136,6 +136,8 @@ const CharactersQuotes = (props: Datas) => {
   const [page, setPage] = useState<number>(1);
   const [previousImagePath, setPreviousImagePath] = useState<string>("");
 
+  // console.log("PROPS", props);
+
   const pictureOfQuote = getRandomImage(
     parseDirs,
     searchedString,
@@ -151,7 +153,7 @@ const CharactersQuotes = (props: Datas) => {
       <Head>
         <title>
           NaruQuotes: Generate random citations now ! -{" "}
-          {charactersDatas?.quotesFound[page - 1]?.character}
+          {isDatas && charactersDatas?.quotesFound[page - 1]?.character}
         </title>
       </Head>
       <MainContainer>
@@ -178,7 +180,12 @@ const CharactersQuotes = (props: Datas) => {
             </SectionQuoteContent>
           </SectionQuote>
         ) : (
-          <p>No datas for this choice</p>
+          <SectionQuoteTitle>
+            {" "}
+            <span>
+              Sorry, no quotes found from <strong>{searchedString}</strong> 🤷‍♂️{" "}
+            </span>
+          </SectionQuoteTitle>
         )}
 
         {isDatas && (
@@ -190,6 +197,7 @@ const CharactersQuotes = (props: Datas) => {
               height={400}
               objectFit="cover"
               objectPosition="center"
+              priority
             />
           </PictureBox>
         )}
@@ -226,31 +234,34 @@ export const getServerSideProps = async (context: any) => {
   const character = params.characterId;
   const parseDirs: PicturesObject[] = [];
 
-  async function findSalesFind(folderName: string): Promise<any> {
-    const storesFiles = await fs.readdir(folderName, { withFileTypes: true });
+  // this func is Not Working w/ Nextjs so far
 
-    for await (const File of storesFiles) {
-      const pictureFolderInfos = {
-        name: File.name,
-        numberOfPicturesAvailable: 0,
-      };
-      if (!File.isDirectory()) {
-        let index = parseDirs.length - 1;
+  // async function findSalesFind(folderName: string): Promise<any> {
+  //   const storesFiles = await fs.readdir(folderName, { withFileTypes: true });
 
-        if (parseDirs?.length === 0) {
-          await parseDirs.push(pictureFolderInfos);
-          parseDirs[0].numberOfPicturesAvailable += 1;
-        } else parseDirs[index].numberOfPicturesAvailable += 1;
-      } else {
-        await parseDirs.push(pictureFolderInfos);
-        await findSalesFind(`${folderName}/${File.name}`);
-      }
-    }
+  //   for await (const File of storesFiles) {
+  //     const pictureFolderInfos = {
+  //       name: File.name,
+  //       numberOfPicturesAvailable: 0,
+  //     };
+  //     if (!File.isDirectory()) {
+  //       let index = parseDirs.length - 1;
 
-    return parseDirs;
-  }
+  //       if (parseDirs?.length === 0) {
+  //         await parseDirs.push(pictureFolderInfos);
+  //         parseDirs[0].numberOfPicturesAvailable += 1;
+  //       } else parseDirs[index].numberOfPicturesAvailable += 1;
+  //     } else {
+  //       await parseDirs.push(pictureFolderInfos);
+  //       await findSalesFind(`${folderName}/${File.name}`);
+  //     }
+  //   }
+
+  //   return parseDirs;
+  // }
 
   // await findSalesFind("public/ressources/images");
+  // console.log(parseDirs);
 
   return fetch(
     `https://animechan.vercel.app/api/quotes/character?name=${character}`
@@ -290,13 +301,13 @@ export const getServerSideProps = async (context: any) => {
             charactersDatas: selectedQuotes,
             searchedString: character,
             parseDirs: [
-              { name: "generics", numberOfPicturesAvailable: 4 },
+              { name: "generics", numberOfPicturesAvailable: 7 },
               { name: "itachi", numberOfPicturesAvailable: 4 },
-              { name: "kakashi", numberOfPicturesAvailable: 1 },
-              { name: "naruto", numberOfPicturesAvailable: 4 },
-              { name: "obito", numberOfPicturesAvailable: 1 },
-              { name: "pain", numberOfPicturesAvailable: 1 },
-              { name: "sasuke", numberOfPicturesAvailable: 3 },
+              { name: "kakashi", numberOfPicturesAvailable: 4 },
+              { name: "naruto", numberOfPicturesAvailable: 5 },
+              { name: "obito", numberOfPicturesAvailable: 5 },
+              { name: "pain", numberOfPicturesAvailable: 4 },
+              { name: "sasuke", numberOfPicturesAvailable: 6 },
             ],
           },
         };
