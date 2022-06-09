@@ -2,6 +2,9 @@
 
 **Visit the website** : https://naruquotes-app.vercel.app/
 
+( ⚠️ ONLY DESKTOP VERSION IS 'ON AIR' FOR NOW 🛫, 
+responsive features COMING 🔜 )
+
 <img src='https://photos.tf1.fr/780/780/perso-showpage-naruto-70c311-7cdbc0-0@1x.png' height=300 style='border: 10px solid white;' />
 
 ## **Toolbox**
