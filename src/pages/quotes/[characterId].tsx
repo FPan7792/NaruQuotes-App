@@ -16,15 +16,47 @@ export const MainContainer = styled.div`
   margin: 80px 200px;
   padding: 0px 0 0px 180px;
   border-left: orangered 1px solid;
+  align-items: center;
+
+  @media screen and (min-width: 600px) and (max-width: 1154px) {
+    border-left: none;
+    padding: 0px;
+    flex-direction: column-reverse;
+    justify-content: center;
+    align-items: center;
+    /* border: green 2px solid; */
+  }
+
+  @media screen and (max-width: 600px) {
+    flex-direction: column-reverse;
+    justify-content: center;
+    align-items: center;
+    border-left: none;
+    margin: 0 auto;
+    padding: 0;
+    width: 80%;
+  }
 `;
 
 const SectionQuote = styled.div`
   text-align: right;
   display: flex;
   flex-direction: column;
-  width: 50%;
+  /* width: 50%; */
+  flex: 2;
   max-height: 400px;
   bottom: 0;
+  /* border: black 2px solid; */
+  min-width: 300px;
+  margin-right: 20px;
+
+  @media screen and (min-width: 600px) and (max-width: 1154px) {
+    align-items: center;
+  }
+
+  @media screen and (max-width: 600px) {
+    /* justify-content: flex-start; */
+  }
 `;
 
 export const SectionQuoteTitle = styled.h3`
@@ -37,6 +69,14 @@ export const SectionQuoteTitle = styled.h3`
     font-weight: normal;
     font-size: 20px;
   }
+
+  @media screen and (min-width: 600px) and (max-width: 1154px) {
+    font-size: 40px;
+  }
+
+  @media screen and (max-width: 600px) {
+    margin-top: -5px;
+  }
 `;
 
 const SectionQuoteContent = styled.p`
@@ -45,6 +85,16 @@ const SectionQuoteContent = styled.p`
   /* border: black 2px solid; */
   max-height: 40%;
   overflow-y: auto;
+
+  @media screen and (min-width: 600px) and (max-width: 1154px) {
+    text-align: center;
+    width: 60%;
+    font-size: 20px;
+    margin-top: -20px;
+  }
+
+  @media screen and (max-width: 600px) {
+  }
 `;
 
 const SectionQuoteAnime = styled.span`
@@ -62,16 +112,37 @@ const PictureBox = styled.div`
   object-position: center;
   object-fit: cover;
   overflow: hidden;
-  height: 400px;
+  height: 100%;
+  width: auto;
+  /* border: red 2px solid; */
+
+  @media screen and (min-width: 600px) and (max-width: 1154px) {
+    /* min-height: 500px; */
+  }
+
+  @media screen and (max-width: 600px) {
+    /* width: 400px;
+    height: 400px; */
+    margin-top: 50px;
+  }
 `;
 
 // SECTION PAGE
 const PageManager = styled.nav`
   display: flex;
   justify-content: space-between;
-  margin: 40px 200px;
-  padding: 0 200px;
+  margin: 40px auto;
+  width: 40%;
+  /* min-width: 700px; */
+  /* padding: 0 200px; */
   font-family: "Rubik", sans-serif;
+  /* border: black 2px solid; */
+
+  @media screen and (min-width: 600px) and (max-width: 1154px) {
+  }
+
+  @media screen and (max-width: 600px) {
+  }
 `;
 
 const PageButton = styled.button`
@@ -86,6 +157,18 @@ const PageButton = styled.button`
 
   :active {
     background-color: orangered;
+  }
+
+  @media screen and (min-width: 600px) and (max-width: 1154px) {
+    height: 30px;
+    padding: 0;
+    width: 30px;
+  }
+
+  @media screen and (max-width: 600px) {
+    height: 40px;
+    padding: 6px;
+    width: 30px;
   }
 `;
 
