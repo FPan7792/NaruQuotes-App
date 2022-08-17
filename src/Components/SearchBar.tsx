@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSearch,
+  faArrowsRotate,
+  faArrowCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
+import { useMediaQuery } from "react-responsive";
 
 type VisibleManager = {
   visible: boolean;
@@ -10,6 +15,11 @@ type VisibleManager = {
 
 const SearchBarContainer = styled.div`
   border-radius: 20px;
+  /* border: red 2px solid; */
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 100%;
 `;
 
 const SearchInput = styled.input.attrs(() => ({
@@ -22,17 +32,15 @@ const SearchInput = styled.input.attrs(() => ({
         return css`
           opacity: 0;
           z-index: -1000;
-
           font-family: "Rubik", sans-serif;
           height: 100%;
           padding: 10px 30px;
-          /* border: black 2px solid; */
           border-radius: 10px;
           transition: 0.5s all ease;
-
           text-align: center;
           border: none;
           cursor: auto;
+          display: none;
 
           :focus {
             border: none;
@@ -42,16 +50,11 @@ const SearchInput = styled.input.attrs(() => ({
 
       case false:
         return css`
-          z-index: -1000;
-          font-family: "Rubik", sans-serif;
-          height: 100%;
-          padding: 10px 30px;
-          /* border: black 2px solid; */
+          /* border: red 2px solid; */
+          /* height: 100px; */
           border-radius: 10px;
-          transition: 0.5s all ease;
-
-          text-align: center;
-          border: none;
+          z-index: 1000;
+          height: 35px;
 
           :focus {
             border: none;
@@ -60,6 +63,22 @@ const SearchInput = styled.input.attrs(() => ({
         `;
     }
   }}
+
+  @media screen and (max-width: 900px) {
+    ${(props: VisibleManager) => {
+      switch (props.visible) {
+        case true:
+          return css`
+            padding: 10px 30px;
+          `;
+
+        case false:
+          return css`
+            padding: 7px 20px;
+          `;
+      }
+    }};
+  }
 `;
 
 const ValidInputButton = styled.button`
@@ -74,6 +93,7 @@ const ValidInputButton = styled.button`
           border-radius: 10px;
           cursor: pointer;
           z-index: 100;
+          display: none;
         `;
 
       case false:
@@ -87,6 +107,33 @@ const ValidInputButton = styled.button`
         `;
     }
   }}
+
+  @media screen and (max-width: 900px) {
+    ${(props: VisibleManager) => {
+      switch (props.visible) {
+        case true:
+          return css`
+            opacity: 0;
+            transition: all ease 0.5s;
+            padding: 10px;
+            /* border: green 2px solid; */
+            border-radius: 10px;
+            cursor: pointer;
+            z-index: 100;
+          `;
+
+        case false:
+          return css`
+            transition: all ease 0.5s;
+            padding: 7px;
+            /* height: 100%; */
+            border-radius: 10px;
+            cursor: pointer;
+            z-index: 100;
+          `;
+      }
+    }};
+  }
 `;
 
 const Celophane = styled.div`
@@ -104,12 +151,13 @@ const Celophane = styled.div`
           background-color: transparent;
           height: 90%;
           width: 100%;
+          /* border: red 2px solid; */
         `;
     }
   }}
 `;
 
-const HiderButton = styled.button`
+const HiderButton = styled.p`
   ${(props: VisibleManager) => {
     switch (props.visible) {
       case true:
@@ -137,10 +185,10 @@ const HiderButton = styled.button`
         return css`
           /* z-index: -100;
           opacity: 0; */
-          padding: 5px 60px;
+          padding: 5px 10px;
           border: none;
           cursor: pointer;
-          font-size: 18px;
+          font-size: 16px;
           background-color: orange;
           border-radius: 10px;
           font-family: "Rubik", sans-serif;
@@ -156,11 +204,69 @@ const HiderButton = styled.button`
         `;
     }
   }};
+
+  @media screen and (max-width: 900px) {
+    ${(props: VisibleManager) => {
+      switch (props.visible) {
+        case true:
+          return css`
+            padding: 2px 30px;
+            font-size: 15px;
+
+            :hover {
+              color: orangered;
+              transform: scale(1.05);
+            }
+            margin-left: 5px;
+          `;
+
+        case false:
+          return css`
+            padding: 5px 10px;
+            font-size: 15px;
+
+            :hover {
+              color: orangered;
+              transform: scale(1.05);
+            }
+            margin-left: 20px;
+          `;
+      }
+    }};
+  }
+
+  @media screen and (max-width: 600px) {
+    ${(props: VisibleManager) => {
+      switch (props.visible) {
+        case true:
+          return css`
+            padding: 5px 30px;
+            font-size: 15px;
+            /* border: yellow 2px solid; */
+
+            :hover {
+              color: orangered;
+              transform: scale(1.05);
+            }
+            margin-left: 5px;
+          `;
+
+        case false:
+          return css`
+            margin-left: 20px;
+          `;
+      }
+    }};
+  }
 `;
 
 export const SearchBar: React.FunctionComponent = () => {
   const characterRef: any = useRef(null);
   const [hideBar, setHideBar] = useState(true);
+
+  const isDesktopScreen = useMediaQuery({ query: "(min-width: 900px)" });
+  const isTabletScreen = useMediaQuery({ query: "(min-width: 500px)" });
+  const isMobileScreen = useMediaQuery({ query: "(max-width: 700px)" });
 
   const router = useRouter();
   const handleRefValue = () => {
@@ -177,12 +283,29 @@ export const SearchBar: React.FunctionComponent = () => {
 
   return (
     <SearchBarContainer>
-      <SearchInput visible={hideBar} ref={characterRef}></SearchInput>
+      {/* input */}
+      <SearchInput
+        visible={hideBar}
+        ref={characterRef}
+        onKeyDown={(e) => {
+          e.key === "Enter" && handleRefValue();
+        }}
+      ></SearchInput>
+      {/* BOUTN LOUPE */}
       <ValidInputButton visible={hideBar} onClick={handleRefValue}>
         <FontAwesomeIcon color="orange" icon={faSearch} />
       </ValidInputButton>
+
+      {/*  BOUTON GENERATE */}
+
       <HiderButton onClick={() => setHideBar(false)} visible={hideBar}>
-        Generate quote
+        {!isMobileScreen ? (
+          "Generate quote"
+        ) : (
+          <>
+            <FontAwesomeIcon icon={faArrowsRotate} color="white" />
+          </>
+        )}
       </HiderButton>
       <Celophane visible={hideBar} onClick={() => setHideBar(true)}></Celophane>
     </SearchBarContainer>
